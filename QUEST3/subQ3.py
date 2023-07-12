@@ -128,10 +128,12 @@ def main():
     X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.2, random_state=50)
     
     # 단일 회귀 모델 테스트용 
+    '''
     # #LinearRegression 모델 학습
     # model = LinearRegression()
     # model.fit(X_train, y_train)
     # print("accuracy : " + str(model.score(X_train,y_train)))
+    '''
 
     # xgb 부스팅 회귀 모델 생성
     model = xgb.XGBRegressor(n_estimators=100, learning_rate=0.08, gamma=0, subsample=0.75, colsample_bytree=1, max_depth=7)
@@ -145,10 +147,12 @@ def main():
     print(predictions)
 
     # 단일 회귀 모델 테스트용
+    '''
     # mse = mean_squared_error(y_test, predictions, squared=True)
     # print("mse : " + str(mse))
     # rmse = mean_squared_error(y_test, predictions, squared=False)
     # print("rmse : " + str(rmse))
+    '''
 
     r_sq = model.score(X_train, y_train)
     print(r_sq)
