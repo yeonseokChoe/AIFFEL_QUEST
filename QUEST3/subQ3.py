@@ -153,13 +153,17 @@ def main():
     # rmse = mean_squared_error(y_test, predictions, squared=False)
     # print("rmse : " + str(rmse))
     '''
-
+	
+    #score
     r_sq = model.score(X_train, y_train)
     print(r_sq)
     print(explained_variance_score(predictions,y_test))
 
+    # 단일 회귀 모델 테스트용 
+    '''
     #temp / count 산점도 예측 결과 시각화
     show_plt_scatter(X_test, y_test, predictions)
+    '''
 
     #test 전처리
     df_test_X = df_test[['bedrooms', 'bathrooms', 'sqft_living', 'floors', 'view', 'grade', 'sqft_above',
