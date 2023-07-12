@@ -1,10 +1,11 @@
-#버전       V_0.01 
+#버전       V_0.02 
 #작성자     최연석
 #분류       subQ3
 #목표1      작성한 노트북을 캐글에 제출했다.
 #목표2      처리, 학습과정 및 결과에 대한 설명이 시각화를 포함하여 전처리, 학습, 최적화 진행 과정이 체계적
 #목표3      피처 엔지니어링과 하이퍼 파라미터 튜닝 등의 최적화 기법을 통해 Private score 기준 110000 이하의 점수      
-#수정사항   write 1st edit(2023.07.12)
+#수정사항   write 1st edit(2023.07.11)
+#          change model - xgboost(2023.07.12)
 
 
 import pandas as pd 
@@ -14,7 +15,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
-
+import xgboost as xgb
+from sklearn.metrics import explained_variance_score
 
 #FILE_PATH = "./" #local
 FILE_PATH = "~/data/data/" #lms
@@ -117,10 +119,6 @@ def main():
     print(df_train.info())
 
     #이상치 제거
-    # df_train = df_train.loc[df_train['sqft_living'] <= 13000]
-    # df_train = df_train.loc[df_train['grade'] != 3]
-    # df_train = df_train.loc[df_train['grade'] != 8]
-    # df_train = df_train.loc[df_train['grade'] != 11]
 
     #train X, y 컬럼 선택 및 train 데이터 분리
     print(df_train.columns)
@@ -129,30 +127,37 @@ def main():
     df_y = df_train["price"]
     X_train, X_test, y_train, y_test = train_test_split(df_X, df_y, test_size=0.2, random_state=50)
     
-    #LinearRegression 모델 학습
-    model = LinearRegression()
-    model.fit(X_train, y_train)
+    # 단일 회귀 모델 테스트용 
+    # #LinearRegression 모델 학습
+    # model = LinearRegression()
+    # model.fit(X_train, y_train)
+    # print("accuracy : " + str(model.score(X_train,y_train)))
 
-    print(model.score(X_train,y_train))
+    # xgb 부스팅 회귀 모델 생성
+    model = xgb.XGBRegressor(n_estimators=100, learning_rate=0.08, gamma=0, subsample=0.75, colsample_bytree=1, max_depth=7)
+
+    model.fit(X_train,y_train)
+
+    xgb.plot_importance(model)
 
     #학습된 모델로 X_test에 대한 예측값 출력 및 손실함수값 계산
     predictions = model.predict(X_test)
     print(predictions)
 
-    mse = mean_squared_error(y_test, predictions, squared=True)
-    print("mse : " + str(mse))
+    # 단일 회귀 모델 테스트용
+    # mse = mean_squared_error(y_test, predictions, squared=True)
+    # print("mse : " + str(mse))
+    # rmse = mean_squared_error(y_test, predictions, squared=False)
+    # print("rmse : " + str(rmse))
 
-    rmse = mean_squared_error(y_test, predictions, squared=False)
-    print("rmse : " + str(rmse))
+    r_sq = model.score(X_train, y_train)
+    print(r_sq)
+    print(explained_variance_score(predictions,y_test))
 
     #temp / count 산점도 예측 결과 시각화
     show_plt_scatter(X_test, y_test, predictions)
 
     #test 전처리
-    # df_test = df_test.loc[df_test['sqft_living'] <= 13000]
-    # df_test = df_test.loc[df_test['grade'] != 3]
-    # df_test = df_test.loc[df_test['grade'] != 8]
-    # df_test = df_test.loc[df_test['grade'] != 11]
     df_test_X = df_test[['bedrooms', 'bathrooms', 'sqft_living', 'floors', 'view', 'grade', 'sqft_above',
                     'sqft_basement', 'lat', 'sqft_living15']]
     
