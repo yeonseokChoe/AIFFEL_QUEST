@@ -16,8 +16,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
 
-FILE_PATH = "./" #local
-#FILE_PATH = "~/data/data/2019KaKR/" #lms
+#FILE_PATH = "./" #local
+FILE_PATH = "~/data/data/" #lms
 FILE_NAME_TRAIN = "train.csv"
 FILE_NAME_TEST = "test.csv"
 
