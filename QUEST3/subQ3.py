@@ -1,11 +1,12 @@
-#버전       V_0.02 
+#버전       V_0.03
 #작성자     최연석
 #분류       subQ3
 #목표1      작성한 노트북을 캐글에 제출했다.
 #목표2      처리, 학습과정 및 결과에 대한 설명이 시각화를 포함하여 전처리, 학습, 최적화 진행 과정이 체계적
 #목표3      피처 엔지니어링과 하이퍼 파라미터 튜닝 등의 최적화 기법을 통해 Private score 기준 110000 이하의 점수      
 #수정사항   write 1st edit(2023.07.11)
-#          change model - xgboost(2023.07.12)
+#          change model - xgboost(2023.07.11)
+#          find parameter - GridSearchCV(2023.07.12)
 
 
 import pandas as pd 
@@ -17,9 +18,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 import xgboost as xgb
 from sklearn.metrics import explained_variance_score
+from sklearn.model_selection import GridSearchCV
 
-#FILE_PATH = "./" #local
-FILE_PATH = "~/data/data/" #lms
+FILE_PATH = "./" #local
+#FILE_PATH = "~/data/data/" #lms
 FILE_NAME_TRAIN = "train.csv"
 FILE_NAME_TEST = "test.csv"
 
@@ -138,6 +140,31 @@ def main():
     # xgb 부스팅 회귀 모델 생성
     model = xgb.XGBRegressor(n_estimators=100, learning_rate=0.08, gamma=0, subsample=0.75, colsample_bytree=1, max_depth=7)
 
+    # GridSearchCV 최적 파라메터 찾기
+    param_grid = {
+    'n_estimators': [50, 100, 150],
+    'max_depth': [1, 10, 15],
+    'learning_rate': [0.05, 0.1, 0.15]
+    }
+
+    grid_model = GridSearchCV(model, param_grid=param_grid, \
+                        scoring='neg_mean_squared_error', \
+                        cv=5, verbose=1, n_jobs=5)
+
+    grid_model.fit(X_train, y_train)
+    
+    print('best parameters : ' + str(grid_model.best_params_))
+    print('best score : ' + str(grid_model.best_score_))
+
+    params = grid_model.cv_results_['params']
+    print(params)
+    score = grid_model.cv_results_['mean_test_score']
+    print(score)
+    RMSE = np.sqrt(-1 * score)
+    print(RMSE)
+
+    model = grid_model.best_estimator_ 
+
     model.fit(X_train,y_train)
 
     xgb.plot_importance(model)
@@ -153,32 +180,28 @@ def main():
     # rmse = mean_squared_error(y_test, predictions, squared=False)
     # print("rmse : " + str(rmse))
     '''
-	
+
     #score
     r_sq = model.score(X_train, y_train)
     print(r_sq)
     print(explained_variance_score(predictions,y_test))
 
-    # 단일 회귀 모델 테스트용 
+    # 단일 회귀 모델 테스트용
     '''
-    #temp / count 산점도 예측 결과 시각화
-    show_plt_scatter(X_test, y_test, predictions)
+    # #temp / count 산점도 예측 결과 시각화
+    # show_plt_scatter(X_test, y_test, predictions)
     '''
 
     #test 전처리
     df_test_X = df_test[['bedrooms', 'bathrooms', 'sqft_living', 'floors', 'view', 'grade', 'sqft_above',
                     'sqft_basement', 'lat', 'sqft_living15']]
     
-    print(df_test.info())
-
     #test predictions
     test_predictions = model.predict(df_test_X)
     test_predictions = convert_exp_data(test_predictions)
-    print(test_predictions)
 
     #test predictions 저장
     df_test["price"] = test_predictions
-    print(df_test)
 
     #파일 저장
     try:
