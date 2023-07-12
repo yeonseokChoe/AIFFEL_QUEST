@@ -20,8 +20,8 @@ import xgboost as xgb
 from sklearn.metrics import explained_variance_score
 from sklearn.model_selection import GridSearchCV
 
-FILE_PATH = "./" #local
-#FILE_PATH = "~/data/data/" #lms
+#FILE_PATH = "./" #local
+FILE_PATH = "~/data/data/" #lms
 FILE_NAME_TRAIN = "train.csv"
 FILE_NAME_TEST = "test.csv"
 
