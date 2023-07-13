@@ -1,6 +1,6 @@
 # AIFFEL Campus Online 5th Code Peer Review
 - 코더 : 최연석
-- 리뷰어 : 
+- 리뷰어 : 김성진
 
 
 # PRT(PeerReviewTemplate) 
