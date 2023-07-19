@@ -379,11 +379,9 @@ def main():
     train_dataset = train_dataset.shuffle(BUFFER_SIZE)
     train_dataset = train_dataset.batch(BATCH_SIZE)
 
-    try:
-        test_dataset = tf.data.Dataset.list_files("./" + 'test/*.jpg')
-    except tf.errors.InvalidArgumentError:
-        print("erorr : faile load val")
-        return -1
+    test_dataset = tf.data.Dataset.list_files("./" + 'val/*.jpg')
+    test_dataset = test_dataset.map(load_image_test)
+    test_dataset = test_dataset.batch(BATCH_SIZE)
 
     down_model = downsample(3, 4)
     down_result = down_model(tf.expand_dims(inp, 0))
